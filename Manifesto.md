@@ -29,9 +29,6 @@ All of these challenges and future possibilities have been our driver in designi
 ## The Compiler
 
 ```mermaid
----
-titile: Compiler
----
 flowchart 
     subgraph " "
     
