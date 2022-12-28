@@ -12,7 +12,7 @@ Rust is very close, it is a powerful and capable high-performance language. But 
 
 Herb Sutter in his Cppcon 2022 presentations mentioned the possibility of eliminating pointer arithmetic altogether from a mock language of future C++[^1]. There is a possibility that we might eliminate certain features in a language so that we can prevent the use of unsafe code, even only partially, from the get go.
 
-C/C++ is the top performer of all the languages as they have very low overhead in the produced binary. But it is ridden by death traps and pitfalls that will make inexperienced programmers facing horrifying crashes and drop of performance. The latter is quite ironic. It has been heard so many times that C++ has a poor performance where in reality the programmer has difficulties in understanding how to use C++ appropriately. Using shared_ptr wherever you see a pointer is one of the very real pitfalls. In an interview with Lex Fridman[^2] James Gosling mentions that Java was created because of pointer bugs in C++, but that doesn’t mean that you should use C++ just like you use Java. That is another pitfall that can lead to performance issues or even crashes.
+C/C++ is the top performer of all the languages as they have very low overhead in the produced binary. But it is ridden by death traps and pitfalls that will make inexperienced programmers facing horrifying crashes and drop of performance. The latter is quite ironic. It has been heard so many times that C++ has a poor performance where in reality the programmer has difficulties in understanding how to use C++ appropriately. Using `shared_ptr` wherever you see a pointer is one of the very real pitfalls. In an interview with Lex Fridman[^2] James Gosling mentions that Java was created because of pointer bugs in C++, but that doesn’t mean that you should use C++ just like you use Java. That is another pitfall that can lead to performance issues or even crashes.
 
 It looks like C++ is very well misunderstood and getting a bad rap because of it. Or maybe it is because C++ runs on a committee that requires it to support backward compatibility because many companies supporting it need many kinds of legacy features. C++ is being held back by its own success. As the creator himself, Bjarne Stroustrup said: “Within C++, there is a much smaller and cleaner language struggling to get out.”[^3]
 
@@ -21,6 +21,7 @@ C/C++ also suffers from the lack of community driven online repository for commo
 All of these challenges and future possibilities have been our driver in designing Motyf as the alternative of future high performance language. In fact, the talk given by Herb Sutter above, shows how he entertained the idea of designing the successor for C++ and how similar it was with our preliminary ideas for Motyf had pushed us to go ahead and design Motyf.
 
 ## Fundamental Concept
+
 
 ## Language Design
 
@@ -33,12 +34,13 @@ flowchart
     subgraph " "
     
     motyf_code[Motyf Code]-->lexer[Lexical Analysis]
+
         subgraph Compilation
         lexer--tokens-->parser[Parsing]
-        parser-->code_gen[Code Generation]
-        parser-->lexer
-        code_gen-->parser
+        parser--AST-->code_gen[Code Generation]
+        parser--lookup-->lexer
         end
+    
     parser--store type-->type_system[Type System]
     type_system--type checking-->parser
     code_gen-->cpp_code[C++20 Code]
