@@ -22,6 +22,18 @@ All of these challenges and future possibilities have been our driver in designi
 
 ## Fundamental Concept
 
+- Motyf is not a stand-alone direct to binary compiler. It generates a C++20 comply source and header files. 
+- Motyf tools will test for C++ compiler and lets user to select prefered compiler
+- 
+
+## Platform
+
+### Toolchain
+
+### Syntax
+
+### Library
+
 
 ## Language Design
 
@@ -52,6 +64,50 @@ flowchart
 
 ### The Parser
 
+## The Source Code
+
+<pre>
+ <code id="htmlViewer" style="color:rgb(220, 220, 220); font-weight:400;background-color:rgb(30, 30, 30);background:rgb(30, 30, 30);display:block;padding: .5em;"> 
+<span style="color:rgb(86, 156, 214); font-weight:400;">module</span> company.project.name
+<span style="color:rgb(86, 156, 214); font-weight:400;">import</span> motyf.core
+
+<span style="color:rgb(87, 166, 74); font-weight:400;">/**
+ * My class
+ */</span>
+<span style="color:rgb(86, 156, 214); font-weight:400;">type</span> my_class: {
+    <span style="color:rgb(86, 156, 214); font-weight:400;">var</span> size : <span style="color:rgb(86, 156, 214); font-weight:400;">int</span>=<span style="color:rgb(184, 215, 163); font-weight:400;">0</span>
+    <span style="color:rgb(86, 156, 214); font-weight:400;">type</span> my_allocator : allocator&lt;<span style="color:rgb(86, 156, 214); font-weight:400;">int</span>&gt;
+
+    <span style="color:rgb(86, 156, 214); font-weight:400;">var</span> local_alloc : my_allocator 
+
+    <span style="color:rgb(220, 220, 220); font-weight:400;"><span style="color:rgb(86, 156, 214); font-weight:400;">func</span> <span style="color:rgb(220, 220, 220); font-weight:400;">do_something</span>: <span style="color:rgb(220, 220, 220); font-weight:400;">(arg1: <span style="color:rgb(86, 156, 214); font-weight:400;">int</span>)</span> -&gt; <span style="color:rgb(220, 220, 220); font-weight:400;">int</span></span> {
+        
+        <span style="color:rgb(86, 156, 214); font-weight:400;">if</span> size == <span style="color:rgb(184, 215, 163); font-weight:400;">0</span>
+            do_something()
+
+        <span style="color:rgb(86, 156, 214); font-weight:400;">if</span> size == <span style="color:rgb(184, 215, 163); font-weight:400;">0</span>; do_something()        
+
+        <span style="color:rgb(86, 156, 214); font-weight:400;">if</span> size == <span style="color:rgb(184, 215, 163); font-weight:400;">0</span> {
+            do_this()
+            do_that()
+        }
+
+        <span style="color:rgb(86, 156, 214); font-weight:400;">return</span> <span style="color:rgb(184, 215, 163); font-weight:400;">0</span>
+    }    
+
+    <span style="color:rgb(220, 220, 220); font-weight:400;"><span style="color:rgb(86, 156, 214); font-weight:400;">func</span> <span style="color:rgb(220, 220, 220); font-weight:400;">do_multi</span>: <span style="color:rgb(220, 220, 220); font-weight:400;">()</span> -&gt; <span style="color:rgb(220, 220, 220); font-weight:400;">int</span>, <span style="color:rgb(220, 220, 220); font-weight:400;">int</span></span> {
+        <span style="color:rgb(86, 156, 214); font-weight:400;">return</span> <span style="color:rgb(184, 215, 163); font-weight:400;">10</span>, <span style="color:rgb(184, 215, 163); font-weight:400;">0</span>
+    }
+
+    <span style="color:rgb(87, 166, 74); font-weight:400;">// Functions without return types implies void return type</span>
+    <span style="color:rgb(220, 220, 220); font-weight:400;"><span style="color:rgb(86, 156, 214); font-weight:400;">func</span> <span style="color:rgb(220, 220, 220); font-weight:400;">do_this</span><span style="color:rgb(220, 220, 220); font-weight:400;">()</span></span> {
+
+        <span style="color:rgb(87, 166, 74); font-weight:400;">// Subscript operator returns status and result</span>
+        <span style="color:rgb(86, 156, 214); font-weight:400;">var</span> i, ok := my_array[<span style="color:rgb(184, 215, 163); font-weight:400;">0</span>] 
+    }
+
+
+}</code></pre>
 ---
 
 [^1]: https://www.youtube.com/watch?v=ELeZAKCN4tY&t=4759s
