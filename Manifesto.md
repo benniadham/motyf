@@ -20,7 +20,40 @@ C/C++ also suffers from the lack of community driven online repository for commo
 
 All of these challenges and future possibilities have been our driver in designing Motyf as the alternative of future high performance language. In fact, the talk given by Herb Sutter above, shows how he entertained the idea of designing the successor for C++ and how similar it was with our preliminary ideas for Motyf had pushed us to go ahead and design Motyf.
 
+## Fundamental Concept
 
+## Language Design
+
+## Syntax Diagram
+
+## The Compiler
+
+```mermaid
+---
+titile: Compiler
+---
+flowchart 
+    subgraph " "
+    
+    motyf_code[Motyf Code]-->lexer[Lexical Analysis]
+        subgraph Compilation
+        lexer--tokens-->parser[Parsing]
+        parser-->code_gen[Code Generation]
+        parser-->lexer
+        code_gen-->parser
+        end
+    parser--store type-->type_system[Type System]
+    type_system--type checking-->parser
+    code_gen-->cpp_code[C++20 Code]
+    motyf_lib[Motyf Library]--include-->cpp_code
+    end
+```
+
+### Lexical Analysis
+
+### The Parser
+
+---
 
 [^1]: https://www.youtube.com/watch?v=ELeZAKCN4tY&t=4759s
 [^2]: https://www.youtube.com/watch?v=RrMptmNYkSw&t=115s
