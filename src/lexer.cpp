@@ -40,7 +40,8 @@ motyf::lexer::lexer(const char *in)
     this->text[sz] = '\0';
 
     this->current = this->text;
-    this->lineno = 1;
+    this->lineno = 1U;
+    this->was_newline = false;
     this->err = error::no_error;
 }
 
@@ -107,13 +108,21 @@ motyf::error motyf::lexer::get_error(void)
 
 void motyf::lexer::skip(void)
 {
-    /* TODO */
+    /* skipping whitespaces */
+    for (; is_ignored(*(this->current)); ++(this->current))
+        /* nothing */;
+
+    if (this->was_newline) {
+        for (; *(this->current) == '\n'; ++(this->current))
+            /* nothing */;
+        this->was_newline = false;
+        this->lineno += 1UL;
+    }
 }
 
 motyf::token motyf::lexer::lex(bool proceed)
 {
     this->skip();
-    this->was_newline = false;
 
     switch (*this->current)
     {
@@ -121,8 +130,9 @@ motyf::token motyf::lexer::lex(bool proceed)
         return token::null;
 
     case '\n':
-        this->was_newline = true;
-        lineno += 1;
+        lineno += 1U;
+        if (proceed)
+            this->was_newline = true;
         proceed_lexer(1);
         return token::newline;
 
@@ -373,7 +383,7 @@ motyf::token motyf::lexer::lex(bool proceed)
     default:
         size_t length = 0UL;
 
-        if (is_key_or_id(*this->current)) {
+        if (is_key_or_id(*(this->current))) {
             do {
                 this->lexeme[length] = *(this->current + length);
                 ++(length);
@@ -383,7 +393,7 @@ motyf::token motyf::lexer::lex(bool proceed)
 
             proceed_lexer(length);
             return token::id;
-        } else if (is_numeric(*this->current)) {
+        } else if (is_numeric(*(this->current))) {
             do {
                 this->lexeme[length] = *(this->current + length);
                 ++(length);
