@@ -114,9 +114,8 @@ void motyf::lexer::skip(void)
 
     if (this->was_newline) {
         for (; *(this->current) == '\n'; ++(this->current))
-            /* nothing */;
+            ++(this->lineno);
         this->was_newline = false;
-        this->lineno += 1UL;
     }
 }
 
@@ -130,9 +129,10 @@ motyf::token motyf::lexer::lex(bool proceed)
         return token::null;
 
     case '\n':
-        lineno += 1U;
-        if (proceed)
+        if (proceed) {
+            ++(this->lineno);
             this->was_newline = true;
+        }
         proceed_lexer(1);
         return token::newline;
 
