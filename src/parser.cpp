@@ -2,109 +2,112 @@
 #include <cstring>
 #include "parser.hpp"
 
-#define proceed_parser(fn) \
-if (! fn) return false
+#define syntax_error(S)                            \
+do {                                               \
+    std::cerr << "syntax error at line "           \
+        << lex->get_lineno() << ": " << S << '\n'; \
+} while (false)
 
-#define return_syntax_error(err) \
-do { std::cerr << "syntax error: " << err << '\n'; return false; } while (false)
-
-motyf::parser::parser(lex *le)
+motyf::parser::parser(lexer *lex)
 {
-	this->lexer = le;
+    this->lex = lex;
 }
 
-bool motyf::parser::module()
+bool motyf::parser::parse()
 {
-	if (! this->lexer->match(token::id))
-		return_syntax_error("expect a module name declaration");
+    if (! module_declaration())
+        return false;
 
-	if (strcmp("module", this->lexer->get_lexeme()) != 0)
-		return_syntax_error("expect a module name declaration");
+    if (! imports())
+        return false;
 
-	if (! this->lexer->match(token::id))
-		return_syntax_error("module what?");
+    if (! definitions())
+        return false;
 
-	while (this->lexer->lookahead() == token::dot) {
-		(void) this->lexer->next();
-		if (! this->lexer->match(token::id))
-			return_syntax_error("malformed module declaration");
-	}
-
-	if (! this->lexer->match(token::newline))
-		return_syntax_error("expect a newline after module declaration");
-
-	return true;
+    return true;
 }
 
-bool motyf::parser::function()
+bool motyf::parser::module_declaration(void)
 {
-	proceed_parser(this->function_prototype());
+    if (! lex->match(token::id)) {
+        syntax_error("expecting 'module' name");
+        return false;
+    }
 
-	if (! this->lexer->match(token::left_brace))
-		return_syntax_error("expect opening brace '{'");
+    if (strcmp(lex->get_lexeme(), "module") != 0) {
+        syntax_error("expecting 'module' name");
+        return false;
+    }
 
-	proceed_parser(this->function_body());
+    if (! module_name())
+        return false;
 
-	if (! this->lexer->match(token::right_brace))
-		return_syntax_error("expect closing brace '}'");
+    if (! lex->match(token::newline)) {
+        syntax_error("expecting newline");
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
-bool motyf::parser::function_prototype()
+bool motyf::parser::imports(void)
 {
-	if (! this->lexer->match(token::id))
-		return_syntax_error("expect function definition keyword 'func'");
+    while (lex->match_lookahead(token::id)) {
+        if (strcmp(lex->get_lexeme(), "import") != 0)
+            break;
 
-	if (strcmp("func", this->lexer->get_lexeme()) != 0)
-		return_syntax_error("expect 'func'");
+        lex->advance(); /* token::id "import" */
 
-	if (! this->lexer->match(token::id))
-		return_syntax_error("expect function identifier");
+        if (! import_name())
+            return false;
 
-	if (! this->lexer->match(token::colon))
-		return_syntax_error("expect a colon ':' after function identifier");
+        if (! lex->match(token::newline)) {
+            syntax_error("expecting newline");
+            return false;
+        }
+    }
 
-	if (! this->lexer->match(token::left_parenthesis))
-		return_syntax_error("expect opening parenthesis '('");
-
-	if (! this->lexer->match(token::right_parenthesis))
-		return_syntax_error("expect closing parenthesis ')'");
-
-	if (this->lexer->match_lookahead(token::minus))
-		proceed_parser(this->function_return());
-
-	return true;
+    return true;
 }
 
-bool motyf::parser::function_body()
+bool motyf::parser::module_name(void)
 {
-	// TODO
-	return true;
+    if (! lex->match(token::id)) {
+        syntax_error("expecting module identifier");
+        return false;
+    }
+
+    if (lex->match_lookahead(token::dot)) {
+        lex->advance(); /* token::dot */
+        if (! module_name())
+            return false;
+    }
+
+    return true;
 }
 
-bool motyf::parser::function_return()
+bool motyf::parser::import_name(void)
 {
-	(void) this->lexer->match(token::minus);
+    if (! lex->match(token::id)) {
+        syntax_error("expecting import identifier");
+        return false;
+    }
 
-	if (! this->lexer->match(token::right_chevron))
-		return_syntax_error("expect arrow before return data types '->'");
+    if (lex->match_lookahead(token::dot)) {
+        lex->advance(); /* token::dot */
+        if (! import_name())
+            return false;
+    }
 
-	proceed_parser(this->datatype_list());
-
-	return true;
+    return true;
 }
 
-bool motyf::parser::datatype_list()
+bool motyf::parser::definitions(void)
 {
-	if (! this->lexer->match(token::id))
-		return_syntax_error("expect list of return datatype");
+    return true;
+}
 
-	if (this->lexer->match_lookahead(token::comma)) {
-		(void) this->lexer->match(token::comma);
-
-		proceed_parser(this->datatype_list());
-	}
-
-	return true;
+bool motyf::parser::type_definition(void)
+{
+    return true;
 }

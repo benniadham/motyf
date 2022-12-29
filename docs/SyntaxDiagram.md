@@ -1,18 +1,23 @@
 ## Motyf Syntax Diagram
 
-* Terminal tokens on the right-hand side of a rule are written as is: `token`.
-* Non-terminal tokens on the right-hand side of a rule are bracketed: `[nonterminal]`.
-* Empty (void) symbol: `#`.
-
-Left-hand sides of rules are always non-terminal. 
+In the syntax notation used in this documentation, syntactic categories, i.e. nonterminals, are indicated by pairs of square brackets surrounding the terms `[term]`, and literal words and character set members, i.e. terminals, are written as is or are indicated by pairs of chevrons surrounding the terms `<term>`. A colon followed by an equal sign `:=` following a nonterminal introduces its definition.
 
 ```
-function           : [function-prototype] [left-brace] [function-body] [right-brace]
-function-prototype : func [identifier] [colon] [left-parenthesis] [function-param] [right-parenthesis] |
-                     func [identifier] [colon] [left-parenthesis] [function-param] [right-parenthesis] [function-return]
-function-body      :
-identifier         :
-function-param     : [statement-declaration] | [statement-declaration] [comma] [function-param] | #
-function-return    : [minus] [right-chevron] [data-type-list]
-data-type-list     : [data-type] | [data-type] [comma] [data-type-list]
+motyf               := [module-declaration] [imports] [definitions]
+
+module-declaration  := module [module-name] <nl>
+
+imports             := import [import-name] <nl>
+                     | import [import-name] <nl> [imports]
+
+module-name         := <id>
+                     | <id> . [module-name]
+
+import-name         := <id>
+                     | <id> . [import-name]
+
+definitions         := [type-definition] [definitions]
+                     | [function-definition] [definitions]
+
+type-definition     := type [class-definition]
 ```
