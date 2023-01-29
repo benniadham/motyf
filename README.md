@@ -6,7 +6,9 @@
 
 - [Goals and motivation ](#goals-and-motivation)
 - [Rationale](#rationale)
-- [Fundamental Concept?](#fundamental-concept)
+- [Fundamental Concept](#fundamental-concept)
+- [Syntax](#syntax)
+- [Transpiler Tools](#transpiler-tools)
 
 ## Goals and Motivation
 Sometimes, at least in my case, it can be quite difficult to build a team of programmers with even levels of proficiency. Especially when we are going to use high performance language such as C/C++. A language where you have have to be really good at it to use it properly. Although you can write a very efficient and fast code, your team member might not be as good as you and produce bad codes that might slowdown or even crash your application. Thus, code reviews and teaching less experienced member is the norm, slowing down development and placing burden on your senior team members.
