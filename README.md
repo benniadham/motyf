@@ -79,20 +79,20 @@ type flags : uint32
 type strings : vector<string>
 
 type point : {
-    var x : int32
-    var y : int32
+    let x : int32
+    let y : int32
 }
 
 type node<T> : {
-    var data : T
+    let data : T
 }
 ```
 
 5. Function declarations are allowed within module or a type.
 ```go
 type point : {
-    var x : int32
-    var y : int32 
+    let x : int32
+    let y : int32 
 }
 ```
 
