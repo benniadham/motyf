@@ -9,41 +9,58 @@ namespace motyf
 
     void parser::define_tokens()
     {
-        scan.add_token_spec(Whitespace, "Whitespace", "^[ \\t]+");
-        scan.add_token_spec(Number, "Number", "^\\d+");
-        scan.add_token_spec(String, "String", "^\"[^\"]*\"");
+        _scanner.add_token_spec(Whitespace, "Whitespace", "^[ \\t]+");
+        _scanner.add_token_spec(Number, "Number", "^\\d+");
+        _scanner.add_token_spec(String, "String", "^\"[^\"]*\"");
 
         // -------------------------------------------------------------------
         // Symbols, Delimiters
-        scan.add_token_spec(Colon, ":", "^:");
-        scan.add_token_spec(SemiColon, ";", "^;");
-        scan.add_token_spec(OpenCurly, "{", "^\\{");
-        scan.add_token_spec(CloseCurly, "}", "^\\}");
+        _scanner.add_token_spec(Colon, ":", "^:");
+        _scanner.add_token_spec(SemiColon, ";", "^;");
+        _scanner.add_token_spec(OpenCurly, "{", "^\\{");
+        _scanner.add_token_spec(CloseCurly, "}", "^\\}");
 
         // --------------------------------------------------------------------
         // Comments
-        scan.add_token_spec(LineComment, "LineComment", "^\\/\\/[^\\n]*");
-        scan.add_token_spec(MultiComment, "MultiComment", "^\\/\\*[\\s\\S]*\\*\\/");
-    }
-
-    parser::ast_node parser::parse(const std::string& program)
-    {
-        ast_node node;
-
-        return node;
+        _scanner.add_token_spec(LineComment, "LineComment", "^\\/\\/[^\\n]*");
+        _scanner.add_token_spec(MultiComment, "MultiComment", "^\\/\\*[\\s\\S]*\\*\\/");
     }
     
-    err::type parser::consume_token(int token_type)
+    ret<scanner::token,err::type> parser::consume_token(int token_type)
     {
-        auto current_token = look_ahead;
+        scanner::token token;
 
-        if (current_token.type == InvalidToken) {
-            err::set_last_error(fmt::sprintf("Syntax error: Unexpected end of input, expecting: %s", scan.token_type_name(token_type)));
-            return err::invalid_state;
+        if (_lookahead.type == InvalidToken) {
+            auto msg = fmt::sprintf("Syntax error: Unexpected end of input, expecting: %s", 
+                                     _scanner.get_token_type_name(token_type));
+
+            err::set_last_error(msg);
+            return {token, err::invalid_state};
         }
 
+        if (_lookahead.type != token_type) {
+            auto expected_token = _scanner.get_token_type_name(token_type);
+            auto current_token = _scanner.get_token_type_name(_lookahead.type);
+
+            auto msg = fmt::sprintf("Syntax error: Unexpected token: %s, expecting: %s", 
+                                     current_token, expected_token);
+
+            err::set_last_error(msg);
+            return {token, err::invalid_state};
+        }
         
-        return err::no_error;
+        token = _lookahead;
+        err::type e;
+
+        catch_ret(_lookahead, e) = _scanner.get_next_token();
+
+        return {token, err::no_error};
+    }
+    
+    ret<ast_node, err::type> parser::parse(const std::string& program)
+    {
+        _scanner.load_buffer(program);
+        return this->program();
     }
 
     /**
@@ -51,11 +68,9 @@ namespace motyf
      *  : StatementList
      *  ;
      */
-    parser::ast_node parser::program()
+    ret<ast_node, err::type> parser::program()
     {
-        ast_node node;
-
-        return node;
+        return expression();
     }
 
     /**
@@ -64,11 +79,11 @@ namespace motyf
      *  | StatementList Statement
      *  ; 
      */
-    parser::ast_node parser::statement_list()
+    ret<ast_node, err::type> parser::statement_list()
     {
         ast_node node;
 
-        return node;
+        return {std::move(node), err::no_error};
     }
 
     /**
@@ -76,11 +91,11 @@ namespace motyf
      *  : ExpressionStatement
      *  ; 
      */
-    parser::ast_node parser::statement()
+    ret<ast_node, err::type> parser::statement()
     {
         ast_node node;
 
-        return node;
+        return {std::move(node), err::no_error};
     }
 
     /**
@@ -88,11 +103,11 @@ namespace motyf
      *  : Expression ';'
      *  ; 
      */
-    parser::ast_node parser::expression_statement()
+    ret<ast_node, err::type> parser::expression_statement()
     {
         ast_node node;
 
-        return node;
+        return {std::move(node), err::no_error};
     }
 
     /**
@@ -100,11 +115,12 @@ namespace motyf
      *  : Literal
      *  ; 
      */
-    parser::ast_node parser::expression()
+    ret<ast_node, err::type> parser::expression()
     {
+
         ast_node node;
 
-        return node;
+        return {std::move(node), err::no_error};
     }
 
     /**
@@ -113,11 +129,20 @@ namespace motyf
      *  | StringLiteral
      *  ; 
      */
-    parser::ast_node parser::literal()
+    ret<ast_node, err::type> parser::literal()
     {
         ast_node node;
 
-        return node;
+        switch (_lookahead.type)
+        {
+        case NumericLiteral:
+            return numeric_literal();
+        case StringLiteral:
+            return string_literal();
+        }
+
+        err::set_last_error("Syntax Error : unexpected Literal production");
+        return {std::move(node), err::invalid_state};
     }
 
     /**
@@ -125,11 +150,19 @@ namespace motyf
      *  : NUMBER
      *  ; 
      */
-    parser::ast_node parser::numeric_literal()
+    ret<ast_node, err::type> parser::numeric_literal()
     {
         ast_node node;
 
-        return node;
+        auto [token, e] = consume_token(Number);
+        if (e != err::no_error) {
+            return {std::move(node), e};
+        }
+
+        node.set_text(token.text);
+        node.set_type(token.type);
+
+        return {std::move(node), err::no_error};
     }
 
     /**
@@ -137,32 +170,19 @@ namespace motyf
      *  : STRING
      *  ; 
      */
-    parser::ast_node parser::string_literal()
+    ret<ast_node, err::type> parser::string_literal()
     {
         ast_node node;
 
-        return node;
-    }
+        auto [token, e] = consume_token(String);
+        if (e != err::no_error) {
+            return {std::move(node), e};
+        }
 
-    parser::ast_node::ast_node()
-    {
-
-    }
-    
-    parser::ast_node::ast_node(ast_node&& other)
-    {
-        body = std::move(other.body);
-        text = other.text;
-        type = other.type;
-    }
-
-    parser::ast_node& parser::ast_node::operator=(ast_node&& other)
-    {
-        body = std::move(other.body);
-        text = other.text;
-        type = other.type;
-
-        return *this;
+        node.set_text(token.text);
+        node.set_type(token.type);
+        
+        return {std::move(node), err::no_error};
     }
 
 } // namespace motyf

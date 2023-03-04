@@ -6,6 +6,7 @@
 #include <string>
 
 #include "scanner.hpp"
+#include "ast_node.hpp"
 
 using namespace ltd;
 
@@ -14,22 +15,6 @@ namespace motyf
     class parser
     {
     public: // types
-        struct ast_node
-        {
-            std::vector<ast_node> body;
-            std::string text;
-            int type    = 0;
-
-            ast_node(const ast_node&& other) = delete;
-            
-            ast_node(ast_node&& other);
-            ast_node();
-
-            ast_node& operator=(const ast_node& other) = delete;
-
-            ast_node& operator=(ast_node&& other);
-        };
-
         enum ast_node_type
         {
             Unknown, NumericLiteral, StringLiteral
@@ -43,28 +28,25 @@ namespace motyf
         };
         
     private:
-
-        scanner scan;
+        scanner _scanner;
+        scanner::token _lookahead;
 
         void define_tokens();
-
-        token look_ahead;
 
     public:
         parser();
 
-        ast_node parse(const std::string& program);
-        
-        err::type consume_token(int token);
+        ret<scanner::token,err::type> consume_token(int token);
 
-        ast_node program();
-        ast_node statement_list();
-        ast_node statement();
-        ast_node expression_statement();
-        ast_node expression();
-        ast_node literal();
-        ast_node numeric_literal();
-        ast_node string_literal();
+        ret<ast_node, err::type> parse(const std::string& program);
+        ret<ast_node, err::type> program();
+        ret<ast_node, err::type> statement_list();
+        ret<ast_node, err::type> statement();
+        ret<ast_node, err::type> expression_statement();
+        ret<ast_node, err::type> expression();
+        ret<ast_node, err::type> literal();
+        ret<ast_node, err::type> numeric_literal();
+        ret<ast_node, err::type> string_literal();
 
     };
 } // namespace motyf

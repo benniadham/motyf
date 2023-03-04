@@ -4,12 +4,12 @@
 
 namespace motyf
 {
-    token::token()
+    scanner::token::token()
     {
         reset();
     }
 
-    void token::reset()
+    void scanner::token::reset()
     {
         type    = -1;
         start   = -1;
@@ -25,53 +25,55 @@ namespace motyf
 
     void scanner::load_buffer(const std::string& program)
     {
-        stream = program;
-        buffer = stream.c_str();
+        _program = program;
+        _buffer  = _program.c_str();
     }
 
     void scanner::add_token_spec(int type, const std::string& name, const std::string& pattern)
     {
         token_spec spec = {type, name, pattern};
-        token_specs[type] = spec;
+
+        _specs[type] = spec;
     }
     
-   ret<token,err::type> scanner::get_next_token()
+   ret<scanner::token,err::type> scanner::get_next_token()
     {
-        token tok;
+        scanner::token token;
 
         if (is_eof())
-            return {tok, err::not_found};
+            return {token, err::not_found};
 
-        for (auto spec : token_specs) 
+        for (auto spec : _specs) 
         {
             std::cmatch cm;
             std::regex rex(spec.second.pattern);
 
-            if (std::regex_search (&buffer[cursor], cm, rex) == false) {
+            if (std::regex_search (&_buffer[_cursor], cm, rex) == false) {
                 continue;
             }
 
-            tok.type = spec.second.type;
-            tok.text = cm[0];
+            token.type = spec.second.type;
+            token.text = cm[0];
 
-            cursor += tok.text.length();
+            _cursor += token.text.length();
 
-            return {tok, err::no_error};
+            return {token, err::no_error};
         }
         
-        auto error_message = fmt::sprintf("Syntax Error: Unexpexted token: '%c'", buffer[cursor]);
+        auto error_message = fmt::sprintf("Syntax Error: Unexpexted token: '%c'", _buffer[_cursor]);
         err::set_last_error(error_message);
-        return {tok, err::invalid_operation};
+
+        return {token, err::invalid_operation};
     }
 
     bool scanner::is_eof() const
     {
-        return cursor < stream.length() ? false : true;
+        return _cursor < _program.length() ? false : true;
     }
 
-    std::string scanner::token_type_name(int type)
+    std::string scanner::get_token_type_name(int type)
     {
-        auto tok = token_specs[type];
-        return tok.name;
+        auto token = _specs[type];
+        return token.name;
     }
 }
