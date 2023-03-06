@@ -23,7 +23,11 @@ target_include_directories(rex PUBLIC ${INC_DIR})
 target_link_libraries(rex motyf)
 
 # Create test executable test_unit
-add_executable(scanner ${TEST_DIR}/scanner.cpp)
-target_include_directories(scanner PUBLIC ${INC_DIR})
-target_link_libraries(scanner motyf ltd)
+add_executable(parsing ${TEST_DIR}/parsing.cpp)
+target_include_directories(parsing PUBLIC ${INC_DIR})
+target_link_libraries(parsing motyf ltd)
 
+# Create test executable test_unit
+add_executable(scanning ${TEST_DIR}/scanning.cpp)
+target_include_directories(scanning PUBLIC ${INC_DIR})
+target_link_libraries(scanning motyf ltd)

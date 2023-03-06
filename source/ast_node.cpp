@@ -2,7 +2,7 @@
 
 namespace motyf
 {
-    ast_node::ast_node()
+    ast_node::ast_node() : _type(0)
     {
 
     }
@@ -52,6 +52,14 @@ namespace motyf
     size_t ast_node::get_body_size() const
     {
         return _body.size();
+    }
+
+    void ast_node::iterate_nodes(std::function<void(const ast_node&)> func) const
+    {
+        int len = _body.size();
+        for (int i=0; i<len;i++) {
+            func(_body[i]);
+        }
     }
     
     void ast_node::put_node(ast_node&& node)

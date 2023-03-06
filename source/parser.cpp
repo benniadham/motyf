@@ -26,7 +26,7 @@ namespace motyf
         _scanner.add_token_spec(MultiComment, "MultiComment", "^\\/\\*[\\s\\S]*\\*\\/");
     }
     
-    ret<scanner::token,err::type> parser::consume_token(int token_type)
+    ret<scanner::token,err::type> parser::  consume_token(int token_type)
     {
         scanner::token token;
 
@@ -60,7 +60,27 @@ namespace motyf
     ret<ast_node, err::type> parser::parse(const std::string& program)
     {
         _scanner.load_buffer(program);
+
+        err::type e;
+        catch_ret(_lookahead, e) = _scanner.get_next_token();
+
         return this->program();
+    }
+
+    void parser::print(const ast_node& node) const
+    {
+        fmt::println("Type %d", node.get_type());
+        fmt::printf("(%s,%s,[", desc[node.get_type()], node.get_text());
+        int flag=0;
+        node.iterate_nodes([this, &flag](const ast_node& child_node) -> void {
+            if(flag==0) {
+                flag = 1;
+                fmt::printf(",");
+            }
+            print(child_node);
+        });
+        fmt::printf("]");
+        fmt::printf(")");
     }
 
     /**
@@ -117,10 +137,7 @@ namespace motyf
      */
     ret<ast_node, err::type> parser::expression()
     {
-
-        ast_node node;
-
-        return {std::move(node), err::no_error};
+        return literal();
     }
 
     /**
@@ -135,9 +152,9 @@ namespace motyf
 
         switch (_lookahead.type)
         {
-        case NumericLiteral:
+        case Number:
             return numeric_literal();
-        case StringLiteral:
+        case String:
             return string_literal();
         }
 
@@ -153,14 +170,14 @@ namespace motyf
     ret<ast_node, err::type> parser::numeric_literal()
     {
         ast_node node;
-
+        fmt::println("numeric_literal");
         auto [token, e] = consume_token(Number);
         if (e != err::no_error) {
             return {std::move(node), e};
         }
 
         node.set_text(token.text);
-        node.set_type(token.type);
+        node.set_type(NumericLiteral);
 
         return {std::move(node), err::no_error};
     }
@@ -180,7 +197,7 @@ namespace motyf
         }
 
         node.set_text(token.text);
-        node.set_type(token.type);
+        node.set_type(StringLiteral);
         
         return {std::move(node), err::no_error};
     }

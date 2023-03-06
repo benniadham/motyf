@@ -15,6 +15,11 @@ namespace motyf
     class parser
     {
     public: // types
+        static constexpr char const *desc[3] =
+        {
+            "Unknown",              "NumericLiteral",           "StringLiteral"
+        };
+
         enum ast_node_type
         {
             Unknown, NumericLiteral, StringLiteral
@@ -37,6 +42,8 @@ namespace motyf
         parser();
 
         ret<scanner::token,err::type> consume_token(int token);
+
+        void print(const ast_node& node) const;
 
         ret<ast_node, err::type> parse(const std::string& program);
         ret<ast_node, err::type> program();

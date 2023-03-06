@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace motyf
 {
@@ -30,6 +31,7 @@ namespace motyf
         void set_type(int type);
 
         size_t get_body_size() const;
+        void iterate_nodes(std::function<void(const ast_node&)> func) const;
         
         void put_node(ast_node&& node);
     };
